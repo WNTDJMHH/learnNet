@@ -7,6 +7,28 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+#define SERVER_STRING "Server: jdbhttpd/0.1.0\r\n"
+
+/**********************************************************************/
+/* Return the informational HTTP headers about a file. */
+/* Parameters: the socket to print the headers on
+ *             the name of the file */
+/**********************************************************************/
+void headers(int client, const char *filename)
+{
+ char buf[1024];
+ (void)filename;  /* could use filename to determine file type */
+
+ strcpy(buf, "HTTP/1.0 200 OK\r\n");
+ send(client, buf, strlen(buf), 0);
+ strcpy(buf, SERVER_STRING);
+ send(client, buf, strlen(buf), 0);
+ sprintf(buf, "Content-Type: text/html\r\n");
+ send(client, buf, strlen(buf), 0);
+ strcpy(buf, "\r\n");
+ send(client, buf, strlen(buf), 0);
+}
+
 int main()
 {
 	struct sockaddr_in add_in;
@@ -44,12 +66,14 @@ int main()
 		printf("new fd is %d\n",newfd);
 		char word[] = "hello, this is from server\n";
 		//if(write(newfd, word, strlen(word)) < 0)
+		headers(newfd,NULL);
 		if(send(newfd, word, strlen(word), 0) < 0)
 		{
 			perror("write to newfd faile ");
 			continue;
 		}
 		close(newfd);
+		printf("send data ok>>>>\n");
 	
 	
 	}		
